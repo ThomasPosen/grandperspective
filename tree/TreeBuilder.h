@@ -41,7 +41,9 @@ typedef NS_ENUM(NSInteger, FileSizeEnum) {
   // In case logical file sizes are used, tracks total physical size.
   item_size_t  totalPhysicalSize;
   // In case logical file sizes are used, tracks how many files are actually smaller than reported.
-  int  numOverestimatedFiles;
+  NSUInteger  numOverestimatedFiles;
+  NSUInteger  numDirectoryReadErrors;
+  NSUInteger  numSkippedDataless;
 
   BOOL  abort;
   FilteredTreeGuide  *treeGuide;

@@ -283,11 +283,23 @@ CFAbsoluteTime convertTimespec(struct timespec ts) {
 
   DirectoryItem  *scanTree = [self treeRootForPath: path context: treeContext];
 
+  numDirectoryReadErrors = 0;
+  numSkippedDataless = 0;
   [progressTracker startingTask];
 
   BOOL  ok = [self buildTreeForDirectory: scanTree atPath: path];
 
   [progressTracker finishedTask];
+  if (numDirectoryReadErrors) {
+    os_log_info(logger,
+                "Failed to read %lu directories (enable full logging for details)",
+                numDirectoryReadErrors);
+  }
+  if (numSkippedDataless) {
+    os_log_info(logger,
+                "Skipped scanning of %lu dataless folders (enable full logging for details)",
+                numSkippedDataless);
+  }
 
   if (! ok) {
     return nil;
@@ -337,7 +349,10 @@ CFAbsoluteTime convertTimespec(struct timespec ts) {
         case FTS_DNR:
         case FTS_ERR:
         case FTS_NS:
-          os_log_info(logger, "Error reading directory %s: %s", entp->fts_path, strerror(entp->fts_errno));
+          numDirectoryReadErrors++;
+          // Optionally log to trusted logger, which is disabled by default.
+          os_log_info(trustedLogger, "Error reading directory %{public}s: %s",
+                      entp->fts_path, strerror(entp->fts_errno));
           continue;
       }
 
@@ -731,7 +746,8 @@ CFAbsoluteTime convertTimespec(struct timespec ts) {
       // trigger download of their contents. This is unwanted, as the state of the volume should
       // not change as a result of the scan. Additionally, it would slow down scanning
       // unnecessarily (and block scanning if there is no network access).
-      os_log_info(logger, "Skipping scan of dataless folder %s", entp->fts_path);
+      numSkippedDataless++;
+      os_log_info(trustedLogger, "Skipping scan of dataless folder %s", entp->fts_path);
     } else if ([lastPathComponent isEqualToString: @"Data"] &&
                [dirChildItem.path isEqualToString: @"/System/Volumes/Data"]) {
       // Do not scan the contents of the System Data volume to prevent its contents from being

@@ -6,6 +6,7 @@
 #import "ScanTaskOutput.h"
 #import "ProgressTracker.h"
 #import "LogManager.h"
+#import "UniformTypeInventory.h"
 
 
 @implementation ScanTaskExecutor
@@ -48,7 +49,9 @@
   [taskLock unlock];
   
   NSDate  *startTime = [NSDate date];
-  
+  UniformTypeInventory*  typeInventory = UniformTypeInventory.defaultUniformTypeInventory;
+  NSUInteger  numBefore = typeInventory.numUnrecognizedExtensions;
+
   TreeContext*  scanTree = [treeBuilder buildTreeForPath: myInput.path];
   ScanTaskOutput  *scanResult = nil;
 
@@ -67,6 +70,13 @@
     } else {
       os_log(logger, "Scanning aborted.");
     }
+  }
+
+  NSUInteger  numAfter = typeInventory.numUnrecognizedExtensions;
+  if (numAfter > numBefore) {
+    os_log_info(logger,
+                "Encountered %lu new unrecognized file extensions (enable full logging for details)",
+                numAfter - numBefore);
   }
 
   [taskLock lock];

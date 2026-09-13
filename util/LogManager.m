@@ -20,7 +20,7 @@
 
     mainLog = os_log_create("net.sf.grandperspectiv", "main");
     trustedLog = (enableTrustedLog
-                  ? os_log_create("net.sf.grandperspectiv", "main")
+                  ? os_log_create("net.sf.grandperspectiv", "trusted")
                   : OS_LOG_DISABLED);
 
     os_log(mainLog, "trusted log enabled = %d", enableTrustedLog);

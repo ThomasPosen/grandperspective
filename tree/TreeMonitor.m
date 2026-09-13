@@ -154,8 +154,8 @@ void eventCallback(ConstFSEventStreamRef streamRef,
         // This typically happens when the user does not have permission to read the given
         // sub-directory, e.g. ~/Library/Cookies. It may also happen when the sub-directory was
         // created after the scan tree was created and subsequently modified.
-        os_log_info(logger, "Could not find sub-directory %@ in %@",
-                    pathComponents[i], dirItem.systemPath);
+        os_log_debug(logger, "Could not find sub-directory %@ in %@",
+                     pathComponents[i], dirItem.systemPath);
         break;
       }
       else if (!child.isDirectory) {
