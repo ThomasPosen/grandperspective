@@ -552,13 +552,13 @@ CFAbsoluteTime convertTimespec(struct timespec ts) {
   [volumeRoot getResourceValue: &volumeFormat forKey: NSURLVolumeLocalizedFormatDescriptionKey
                          error: &error];
   if (error == nil) {
-    os_log_info(logger, "Volume format = %@", volumeFormat);
+    os_log_info(logger, "Volume format = %{public}@", volumeFormat);
   }
 
   ignoreHardLinksForDirectories = NO; // Default
   struct statfs volinfo;
   if (statfs(volumeRoot.path.fileSystemRepresentation, &volinfo) == 0) {
-    os_log_info(logger, "fstypename = %s", volinfo.f_fstypename);
+    os_log_info(logger, "fstypename = %{public}s", volinfo.f_fstypename);
     if (strcmp("apfs", volinfo.f_fstypename) == 0) {
       // APFS does not support hardlinking directories. However, directories will have a non-zero
       // hardlink count, as each file it contains increases the count. So ignore this count when
