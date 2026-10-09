@@ -430,3 +430,39 @@
 /* Parse error */
 "Unrecognized value" = "Unrecognized value";
 
+
+/* Menu item */
+"Show File Types" = "Show File Types";
+
+/* Menu item */
+"Hide File Types" = "Hide File Types";
+
+/* Title of file types panel */
+"File Types" = "File Types";
+
+/* Column header in file types panel */
+"Kind" = "Kind";
+
+/* Column header in file types panel */
+"Files" = "Files";
+
+/* Button in file types panel */
+"Color View by File Type" = "Color View by File Type";
+
+/* Hint in file types panel */
+"Select a type to highlight its files. Hold \U2318 to select several." = "Select a type to highlight its files. Hold \U2318 to select several.";
+
+/* Summary in file types panel: types, files, total size */
+"%@ types \U00B7 %@ files \U00B7 %@" = "%@ types \U00B7 %@ files \U00B7 %@";
+
+/* File type name based on its extension */
+"%@ file" = "%@ file";
+
+/* Tool tip for unrecognized extension */
+".%@ (type unknown to macOS)" = ".%@ (type unknown to macOS)";
+
+/* File type name for files without extension */
+"Unknown (no extension)" = "Unknown (no extension)";
+
+/* Tool tip for files without extension */
+"Files without an extension whose type is unknown" = "Files without an extension whose type is unknown";

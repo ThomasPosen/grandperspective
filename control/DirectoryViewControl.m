@@ -13,6 +13,7 @@
 #import "DirectoryViewControlSettings.h"
 #import "DirectoryViewDisplaySettings.h"
 #import "ControlPanelControl.h"
+#import "FileTypesPanelControl.h"
 #import "PreferencesPanelControl.h"
 #import "MainMenuControl.h"
 
@@ -33,6 +34,14 @@ NSString  *DeleteFilesAndFolders = @"delete files and folders";
 NSString  *ViewWillOpenEvent = @"viewWillOpen";
 NSString  *ViewWillCloseEvent = @"viewWillClose";
 
+// User defaults for the File Types panel
+static NSString  *ShowFileTypesPanelKey = @"showFileTypesPanel";
+static NSString  *FileTypesPanelWidthKey = @"fileTypesPanelWidth";
+
+static const CGFloat  DefaultFileTypesPanelWidth = 320;
+static const CGFloat  MinFileTypesPanelWidth = 220;
+static const CGFloat  MinMainViewWidth = 150;
+
 
 #define NOTE_IT_MAY_NOT_EXIST_ANYMORE \
   NSLocalizedString(\
@@ -40,7 +49,8 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
     @"Alert message (Note: 'it' can refer to a file or a folder)")
 
 
-@interface DirectoryViewControl () <QLPreviewPanelDataSource, QLPreviewPanelDelegate> {
+@interface DirectoryViewControl () <QLPreviewPanelDataSource, QLPreviewPanelDelegate,
+                                    NSSplitViewDelegate> {
 }
 
 @property (strong) QLPreviewPanel *previewPanel;
@@ -78,6 +88,11 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
 
 - (NSURL *)appUrlForOpeningFileItem:(FileItem *)fileItem;
 - (void) openFile:(FileItem *)fileItem withApplication:(NSURL *)appUrl;
+
+- (void) setUpFileTypesPanel;
+- (void) setFileTypesPanelShown:(BOOL)show;
+- (void) applyColorMappingKey:(NSString *)colorMappingKey;
+- (void) colorByFileTypeRequested:(NSNotification *)notification;
 @end
 
 
@@ -167,6 +182,11 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
 
   [customOpenApp release];
   [customRevealApp release];
+
+  [fileTypesControl invalidate];
+  [fileTypesControl release];
+  [splitView release];
+  [savedColorMappingKey release];
   
   [super dealloc];
 }
@@ -206,6 +226,8 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
 
 - (void) windowDidLoad {
   [mainView postInitWithPathModelView: pathModelView];
+
+  [self setUpFileTypesPanel];
   
   [self updateFileDeletionSupport];
 
@@ -246,6 +268,10 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
          selector: @selector(displayFocusChanged:)
              name: DisplayFocusChangedEvent
            object: mainView];
+  [nc addObserver: self
+         selector: @selector(colorByFileTypeRequested:)
+             name: FileTypesPanelColorByTypeRequestEvent
+           object: fileTypesControl];
 
   [userDefaults addObserver: self 
                  forKeyPath: FileDeletionTargetsKey
@@ -270,6 +296,10 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
   [self.window setFrame: frame display: NO];
 
   mainView.displayDepth = initialSettings.displayDepth;
+
+  if ([userDefaults boolForKey: ShowFileTypesPanelKey]) {
+    [self setFileTypesPanelShown: YES];
+  }
   
   [self.window makeFirstResponder: mainView];
   [self.window makeKeyAndOrderFront: self];
@@ -297,6 +327,8 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
 
 // Invoked because the controller is the delegate for the window.
 - (void) windowWillClose:(NSNotification *)notification {
+  [fileTypesControl invalidate];
+
   [NSNotificationCenter.defaultCenter postNotificationName: ViewWillCloseEvent object: self];
   [self autorelease];
 }
@@ -486,9 +518,25 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
   [ControlPanelControl.singletonInstance showInfoPanel];
 }
 
+- (IBAction) toggleFileTypesPanel:(id)sender {
+  BOOL  show = !self.isFileTypesPanelShown;
+
+  [self setFileTypesPanelShown: show];
+
+  // Remember the choice for new windows
+  [NSUserDefaults.standardUserDefaults setBool: show forKey: ShowFileTypesPanelKey];
+}
+
+- (BOOL) isFileTypesPanelShown {
+  return fileTypesControl != nil && !fileTypesControl.view.hidden;
+}
+
 
 - (void) searchForFiles:(NSString *)spec {
   FileItemTest  *overlayTest = nil;
+
+  // The search highlight replaces any file type highlight
+  [fileTypesControl relinquishHighlight];
 
   if (spec.length > 0) {
     StringContainmentTest  *stringTest =
@@ -520,6 +568,9 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
   if (action == @selector(copy:)) {
     return self.canCopySelectedPathToPasteboard;
   }
+  if (action == @selector(toggleFileTypesPanel:)) {
+    return fileTypesControl != nil;
+  }
 
   return NO;
 }
@@ -531,6 +582,11 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
     menuItem.title = pathModelView.selectedFileItem.isDirectory
       ? NSLocalizedStringFromTable(@"Delete Folder", @"Localizable", @"Menu item")
       : NSLocalizedStringFromTable(@"Delete File", @"Localizable", @"Menu item");
+  }
+  else if (action == @selector(toggleFileTypesPanel:)) {
+    menuItem.title = self.isFileTypesPanelShown
+      ? NSLocalizedStringFromTable(@"Hide File Types", @"Localizable", @"Menu item")
+      : NSLocalizedStringFromTable(@"Show File Types", @"Localizable", @"Menu item");
   }
 
   return [self validateAction: menuItem.action];
@@ -771,6 +827,19 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
 
   // How packages are shown may impact how the selected item is represented
   [self updateSelectionInStatusbar: nil];
+
+  if (self.isFileTypesPanelShown) {
+    if (![displaySettings.colorMappingKey isEqualToString: FileTypeColorMappingKey]) {
+      // The user picked another color mapping while the panel is shown. Respect that choice, i.e.
+      // do not restore the original mapping when the panel is hidden.
+      [savedColorMappingKey release];
+      savedColorMappingKey = nil;
+    }
+
+    // Which items are shown (e.g. package contents, entire volume) affects the statistics
+    [fileTypesControl refreshStatistics];
+    [fileTypesControl refreshColors];
+  }
 }
 
 - (void) displayFocusChanged:(NSNotification *)notification {
@@ -972,6 +1041,158 @@ NSString  *ViewWillCloseEvent = @"viewWillClose";
       [alert beginSheetModalForWindow: self.window completionHandler: nil];
     });
   }];
+}
+
+
+//----------------------------------------------------------------------------------------------
+// File Types panel
+
+/* Places the main view inside a split view, with the (initially hidden) File Types panel on its
+ * right.
+ */
+- (void) setUpFileTypesPanel {
+  NSView  *contentView = self.window.contentView;
+
+  fileTypesControl = [[FileTypesPanelControl alloc] initWithDirectoryView: mainView
+                                                              treeContext: treeContext];
+
+  splitView = [[NSSplitView alloc] initWithFrame: mainView.frame];
+  splitView.vertical = YES;
+  splitView.dividerStyle = NSSplitViewDividerStyleThin;
+  splitView.arrangesAllSubviews = YES;
+  splitView.delegate = self;
+  splitView.translatesAutoresizingMaskIntoConstraints = NO;
+
+  // Move the main view into the split view. Removing it from its superview also removes its
+  // constraints, so the split view takes over its position.
+  [mainView retain];
+  [mainView removeFromSuperview];
+  [contentView addSubview: splitView];
+  [splitView addArrangedSubview: mainView];
+  [mainView release];
+
+  NSView  *panel = fileTypesControl.view;
+  panel.translatesAutoresizingMaskIntoConstraints = NO;
+  panel.hidden = YES;
+  [splitView addArrangedSubview: panel];
+
+  // When the window is resized, the main view should grow or shrink, not the panel.
+  [splitView setHoldingPriority: NSLayoutPriorityDefaultLow forSubviewAtIndex: 0];
+  [splitView setHoldingPriority: NSLayoutPriorityDefaultLow + 10 forSubviewAtIndex: 1];
+
+  NSLayoutConstraint  *minMainWidth =
+    [mainView.widthAnchor constraintGreaterThanOrEqualToConstant: MinMainViewWidth];
+  minMainWidth.priority = NSLayoutPriorityDefaultHigh;
+
+  [NSLayoutConstraint activateConstraints: @[
+    [splitView.topAnchor constraintEqualToAnchor: contentView.topAnchor],
+    [splitView.leadingAnchor constraintEqualToAnchor: contentView.leadingAnchor],
+    [splitView.trailingAnchor constraintEqualToAnchor: contentView.trailingAnchor],
+    [itemPathField.topAnchor constraintEqualToAnchor: splitView.bottomAnchor],
+    minMainWidth
+  ]];
+
+  fileTypesPanelWidth =
+    [NSUserDefaults.standardUserDefaults doubleForKey: FileTypesPanelWidthKey];
+  if (fileTypesPanelWidth < MinFileTypesPanelWidth) {
+    fileTypesPanelWidth = DefaultFileTypesPanelWidth;
+  }
+}
+
+- (void) setFileTypesPanelShown:(BOOL)show {
+  if (fileTypesControl == nil || show == self.isFileTypesPanelShown) {
+    return;
+  }
+
+  NSView  *panel = fileTypesControl.view;
+
+  if (show) {
+    if (![displaySettings.colorMappingKey isEqualToString: FileTypeColorMappingKey]) {
+      // Color the view by file type, so that the colors in the panel match those in the view.
+      [savedColorMappingKey release];
+      savedColorMappingKey = [displaySettings.colorMappingKey copy];
+
+      [self applyColorMappingKey: FileTypeColorMappingKey];
+    }
+
+    panel.hidden = NO;
+    [self.window.contentView layoutSubtreeIfNeeded];
+
+    CGFloat  totalWidth = splitView.bounds.size.width;
+    CGFloat  width = MIN(fileTypesPanelWidth, totalWidth - MinMainViewWidth);
+    width = MAX(width, MinFileTypesPanelWidth);
+    [splitView setPosition: totalWidth - width - splitView.dividerThickness
+          ofDividerAtIndex: 0];
+
+    fileTypesControl.active = YES;
+  }
+  else {
+    fileTypesPanelWidth = panel.frame.size.width;
+
+    [fileTypesControl clearSelection];
+    fileTypesControl.active = NO;
+    panel.hidden = YES;
+
+    if (savedColorMappingKey != nil) {
+      NSString  *restoreKey = [savedColorMappingKey autorelease];
+      savedColorMappingKey = nil;
+
+      if ([displaySettings.colorMappingKey isEqualToString: FileTypeColorMappingKey]) {
+        [self applyColorMappingKey: restoreKey];
+      }
+    }
+  }
+}
+
+/* Changes the color mapping of this view, and updates the Control Panel to match.
+ */
+- (void) applyColorMappingKey:(NSString *)colorMappingKey {
+  DirectoryViewDisplaySettings  *newSettings = [[displaySettings copy] autorelease];
+  newSettings.colorMappingKey = colorMappingKey;
+
+  [displaySettings release];
+  displaySettings = [newSettings retain];
+
+  [self propagateDisplaySettings];
+
+  if (self.window.isMainWindow) {
+    [ControlPanelControl.singletonInstance mainWindowChanged: self];
+  }
+}
+
+- (void) colorByFileTypeRequested:(NSNotification *)notification {
+  // Explicit user request, so there is nothing to restore when the panel is hidden.
+  [savedColorMappingKey release];
+  savedColorMappingKey = nil;
+
+  [self applyColorMappingKey: FileTypeColorMappingKey];
+}
+
+//----------------------------------------------------------------------------------------------
+// NSSplitViewDelegate
+
+- (CGFloat) splitView:(NSSplitView *)sv
+constrainMinCoordinate:(CGFloat)proposedMinimumPosition
+          ofSubviewAt:(NSInteger)dividerIndex {
+  return MAX(proposedMinimumPosition, MinMainViewWidth);
+}
+
+- (CGFloat) splitView:(NSSplitView *)sv
+constrainMaxCoordinate:(CGFloat)proposedMaximumPosition
+          ofSubviewAt:(NSInteger)dividerIndex {
+  return MIN(proposedMaximumPosition,
+             sv.bounds.size.width - MinFileTypesPanelWidth - sv.dividerThickness);
+}
+
+- (void) splitViewDidResizeSubviews:(NSNotification *)notification {
+  if (self.isFileTypesPanelShown) {
+    CGFloat  width = fileTypesControl.view.frame.size.width;
+
+    if (width >= MinFileTypesPanelWidth) {
+      fileTypesPanelWidth = width;
+      [NSUserDefaults.standardUserDefaults setDouble: width forKey: FileTypesPanelWidthKey];
+    }
+  }
 }
 
 @end // @implementation DirectoryViewControl (PrivateMethods)

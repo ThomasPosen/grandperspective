@@ -272,6 +272,12 @@
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="NvV-Xg-wc5"/>
+                            <menuItem title="Show/Hide File Types" keyEquivalent="k" id="FtP-nl-T0g">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="toggleFileTypesPanel:" target="-1" id="FtP-ac-T0g"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Show/Hide Toolbar" keyEquivalent="t" id="350">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                 <connections>

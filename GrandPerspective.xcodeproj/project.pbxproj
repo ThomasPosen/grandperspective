@@ -63,6 +63,7 @@
 		AA61786F0A38B8D500B8AB16 /* NotifyingDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = AA61786D0A38B8D500B8AB16 /* NotifyingDictionary.m */; };
 		AA63515A0972E1F70024C9D0 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = AAD6855008D9FE600096C6C1 /* Credits.rtf */; };
 		AA6E27A40D7AE95E00D5FBBA /* ColorLegendTableViewControl.m in Sources */ = {isa = PBXBuildFile; fileRef = AA6E27A20D7AE95E00D5FBBA /* ColorLegendTableViewControl.m */; };
+		F17E000000000000000000A3 /* FileTypesPanelControl.m in Sources */ = {isa = PBXBuildFile; fileRef = F17E000000000000000000A2 /* FileTypesPanelControl.m */; };
 		AA6FE2941CD6396500675955 /* Taglines.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA6FE2921CD6396500675955 /* Taglines.strings */; };
 		AA7A7E0D0E4EE29D00EB366E /* WriteTaskInput.m in Sources */ = {isa = PBXBuildFile; fileRef = AA7A7E0C0E4EE29D00EB366E /* WriteTaskInput.m */; };
 		AA7A7E110E4EE3DA00EB366E /* WriteTaskExecutor.m in Sources */ = {isa = PBXBuildFile; fileRef = AA7A7E100E4EE3DA00EB366E /* WriteTaskExecutor.m */; };
@@ -368,6 +369,8 @@
 		AA62F2B81FC1D8290089E127 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/DirectoryViewWindow.strings; sourceTree = "<group>"; };
 		AA6E27A10D7AE95E00D5FBBA /* ColorLegendTableViewControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ColorLegendTableViewControl.h; path = control/ColorLegendTableViewControl.h; sourceTree = "<group>"; };
 		AA6E27A20D7AE95E00D5FBBA /* ColorLegendTableViewControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ColorLegendTableViewControl.m; path = control/ColorLegendTableViewControl.m; sourceTree = "<group>"; };
+		F17E000000000000000000A1 /* FileTypesPanelControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileTypesPanelControl.h; path = control/FileTypesPanelControl.h; sourceTree = "<group>"; };
+		F17E000000000000000000A2 /* FileTypesPanelControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FileTypesPanelControl.m; path = control/FileTypesPanelControl.m; sourceTree = "<group>"; };
 		AA6FE2951CD6397100675955 /* nl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Taglines.strings; sourceTree = "<group>"; };
 		AA7A7E0B0E4EE29D00EB366E /* WriteTaskInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WriteTaskInput.h; path = task/WriteTaskInput.h; sourceTree = "<group>"; };
 		AA7A7E0C0E4EE29D00EB366E /* WriteTaskInput.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WriteTaskInput.m; path = task/WriteTaskInput.m; sourceTree = "<group>"; };
@@ -1036,6 +1039,8 @@
 				AA402FF50A5B01A6004EAAF3 /* MainMenuControl.m */,
 				AA6E27A10D7AE95E00D5FBBA /* ColorLegendTableViewControl.h */,
 				AA6E27A20D7AE95E00D5FBBA /* ColorLegendTableViewControl.m */,
+				F17E000000000000000000A1 /* FileTypesPanelControl.h */,
+				F17E000000000000000000A2 /* FileTypesPanelControl.m */,
 				AA402FF60A5B01A6004EAAF3 /* DirectoryViewControl.h */,
 				AA402FF10A5B01A6004EAAF3 /* DirectoryViewControl.m */,
 				AA1115C10A84CA320023C5CD /* DirectoryViewControlSettings.h */,
@@ -1186,7 +1191,6 @@
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					8D1107260486CEB800E47090 = {
-						DevelopmentTeam = 3Z75QZGN66;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.HardenedRuntime = {
@@ -1313,6 +1317,7 @@
 				AA7DEC8E0D6EDE820057F5F8 /* UniformTypeRanking.m in Sources */,
 				AA7DF3240D79BEA80057F5F8 /* GradientRectangleDrawer.m in Sources */,
 				AA6E27A40D7AE95E00D5FBBA /* ColorLegendTableViewControl.m in Sources */,
+				F17E000000000000000000A3 /* FileTypesPanelControl.m in Sources */,
 				AA8A38080D7B437300DB872C /* FileItemMappingCollection.m in Sources */,
 				AA8A380A0D7B437300DB872C /* FileItemMappingScheme.m in Sources */,
 				AAD50FCE21BDB30F00784BBF /* AlertMessage.m in Sources */,
@@ -1809,7 +1814,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 3Z75QZGN66;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -1852,7 +1857,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 3Z75QZGN66;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1892,7 +1897,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 3Z75QZGN66;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1914,7 +1919,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GrandPerspectiveLogo;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = GrandPerspective.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -1948,7 +1953,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GrandPerspectiveLogo;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = GrandPerspective.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
@@ -1979,7 +1984,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = GrandPerspectiveLogo;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = GrandPerspective.entitlements;
-				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 28;

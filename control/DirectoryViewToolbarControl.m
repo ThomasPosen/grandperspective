@@ -22,6 +22,7 @@ NSString  *ToolbarDeleteItem = @"DeleteItem";
 NSString  *ToolbarRescan = @"Rescan";
 NSString  *ToolbarShowInfo = @"ShowInfo";
 NSString  *ToolbarSearch = @"Search";
+NSString  *ToolbarFileTypes = @"FileTypes";
 
 
 // Tags for each of the segments in the Zoom and Focus controls, so that the 
@@ -50,6 +51,7 @@ static const NSUInteger FOCUS_RESET_TAG = 105;
 @property (nonatomic, readonly, copy) NSToolbarItem *rescanToolbarItem;
 @property (nonatomic, readonly, copy) NSToolbarItem *showInfoToolbarItem;
 @property (nonatomic, readonly, copy) NSToolbarItem *searchToolbarItem;
+@property (nonatomic, readonly, copy) NSToolbarItem *fileTypesToolbarItem;
 
 - (id) validateZoomControls:(NSToolbarItem *)toolbarItem;
 - (id) validateFocusControls:(NSToolbarItem *)toolbarItem;
@@ -238,6 +240,8 @@ NSMutableDictionary  *createToolbarItemLookup = nil;
               usingSelector: @selector(showInfoToolbarItem)];
     [self createToolbarItem: ToolbarSearch
               usingSelector: @selector(searchToolbarItem)];
+    [self createToolbarItem: ToolbarFileTypes
+              usingSelector: @selector(fileTypesToolbarItem)];
   }
   
   SelectorObject  *selObj = createToolbarItemLookup[itemIdentifier];
@@ -260,6 +264,7 @@ NSMutableDictionary  *createToolbarItemLookup = nil;
              ToolbarRescan,
              NSToolbarFlexibleSpaceItemIdentifier,
              ToolbarSearch,
+             ToolbarFileTypes,
              ToolbarShowInfo];
 }
 
@@ -270,6 +275,7 @@ NSMutableDictionary  *createToolbarItemLookup = nil;
              ToolbarRescan,
              ToolbarShowInfo,
              ToolbarSearch,
+             ToolbarFileTypes,
              NSToolbarSpaceItemIdentifier,
              NSToolbarFlexibleSpaceItemIdentifier];
 }
@@ -460,6 +466,22 @@ NSMutableDictionary  *createToolbarItemLookup = nil;
   item.image = [NSImage imageWithSystemSymbolName: @"info.circle.fill"
                          accessibilityDescription: nil];
   item.action = @selector(showInfo:);
+  item.target = dirViewControl;
+
+  return item;
+}
+
+- (NSToolbarItem *)fileTypesToolbarItem {
+  NSToolbarItem  *item =
+    [[[NSToolbarItem alloc] initWithItemIdentifier: ToolbarFileTypes] autorelease];
+
+  [item setLabel: NSLocalizedStringFromTable(@"File Types", @"Toolbar", @"Toolbar action")];
+  item.paletteLabel = item.label;
+  [item setToolTip: NSLocalizedStringFromTable(@"Show or hide the file types panel",
+                                               @"Toolbar", @"Tooltip")];
+  item.image = [NSImage imageWithSystemSymbolName: @"chart.bar.doc.horizontal"
+                         accessibilityDescription: nil];
+  item.action = @selector(toggleFileTypesPanel:);
   item.target = dirViewControl;
 
   return item;

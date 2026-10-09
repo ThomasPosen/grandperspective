@@ -16,6 +16,7 @@ extern NSString  *ViewWillCloseEvent;
 @class DirectoryViewDisplaySettings;
 @class TreeContext;
 @class AnnotatedTreeContext;
+@class FileTypesPanelControl;
 
 @interface DirectoryViewControl : NSWindowController<NSMenuItemValidation> {
 
@@ -52,6 +53,16 @@ extern NSString  *ViewWillCloseEvent;
 
   // The size of the view when it is not zoomed.
   NSSize  unzoomedViewSize;
+
+  // The "File Types" side panel, and the split view that hosts it next to the main view.
+  NSSplitView  *splitView;
+  FileTypesPanelControl  *fileTypesControl;
+  CGFloat  fileTypesPanelWidth;
+
+  // The color mapping that was active before showing the File Types panel switched the view to
+  // coloring by file type. It is restored when the panel is hidden again. It is nil when the panel
+  // did not change the color mapping (or when the user changed it since).
+  NSString  *savedColorMappingKey;
 }
 
 - (IBAction) openFile:(id)sender;
@@ -59,6 +70,11 @@ extern NSString  *ViewWillCloseEvent;
 - (IBAction) revealFileInFinder:(id)sender;
 - (IBAction) deleteFile:(id)sender;
 - (IBAction) showInfo:(id)sender;
+
+/* Shows or hides the File Types panel, which lists the file types in the view by size (similar to
+ * the "kind statistics" of Disk Inventory X). Showing it also colors the view by file type.
+ */
+- (IBAction) toggleFileTypesPanel:(id)sender;
 
 - (void) searchForFiles:(NSString *)searchSpec;
 
@@ -98,6 +114,8 @@ extern NSString  *ViewWillCloseEvent;
  * mouse position changes.
  */
 @property (nonatomic, getter=isSelectedFileLocked, readonly) BOOL selectedFileLocked;
+
+@property (nonatomic, getter=isFileTypesPanelShown, readonly) BOOL fileTypesPanelShown;
 
 @property (class, nonatomic, readonly) NSArray *fileDeletionTargetNames;
 

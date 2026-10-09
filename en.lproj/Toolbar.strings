@@ -73,3 +73,9 @@
 /* Toolbar action */
 "Zoom out" = "Zoom out";
 
+
+/* Toolbar action */
+"File Types" = "File Types";
+
+/* Tooltip */
+"Show or hide the file types panel" = "Show or hide the file types panel";
